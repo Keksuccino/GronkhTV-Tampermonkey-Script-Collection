@@ -22,6 +22,12 @@ Dieses Script is rein kosmetisch und macht nichts anderes, als dem Chat Footer e
 
 <img width="500" alt="Screenshot_7" src="https://github.com/user-attachments/assets/bb022cb6-569b-4cb4-8fd4-fc2f1b6fb6ed" />
 
+## Dark Scrollbar (`gronkh-tv-chat-dark-scrollbar.user.js`)
+
+Falls sich die Lightmode-Scrollbar des Chats schon langsam in deinen Monitor einbrennt, kannst du ihr mit diesem Script einen modernen, dunklen Look verpassen.
+
+<img width="400" alt="Screenshot_15" src="https://github.com/user-attachments/assets/8a862d1b-eb5d-43b1-a74d-a2ed01a8cbd9" />
+
 ## Chat Replay Offset (`gronkh-chat-replay-offset.user.js`)
 
 Bei manchen Streams, vorallem älteren, ist der Chat teilweise sehr asynchron (bis zu 10 Minuten versetzt). Dieses Script behebt das, indem es dich ein Chat-Offset setzen lässt. Das Offset ist pro Stream einstellbar und wird selbst über Browser Neustarts hinweg gespeichert.
