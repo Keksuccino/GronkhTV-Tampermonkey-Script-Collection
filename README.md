@@ -1,3 +1,5 @@
+# Gronkh.TV Script Collection
+
 Diese kleine Kollection von Tampermonkey Scripts soll das Nutzererlebnis auf Gronkh.TV verbessern, indem es kleine Bugs und Problemchen behebt, und einige QoL Features hinzufügt.
 
 # Script Übersicht
