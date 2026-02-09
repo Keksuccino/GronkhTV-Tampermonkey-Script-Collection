@@ -2,7 +2,7 @@
 
 Diese kleine Kollection von Tampermonkey Scripts soll das Nutzererlebnis auf Gronkh.TV verbessern, indem es kleine Bugs und Problemchen behebt, und einige QoL Features hinzufügt.
 
-## Chat Filter
+## Chat Filter (`gronkh-tv-chat-filter.user.js`)
 
 Dieses kleine Script fügt eine Filterfunktion für den Chat hinzu, mit der ihr Nachrichten, die bestimmte Wörter oder Wortgruppen enthalten, verstecken könnt. Besonders hilfreich, wenn mal wieder Commands in den Chat gespammt werden.
 
