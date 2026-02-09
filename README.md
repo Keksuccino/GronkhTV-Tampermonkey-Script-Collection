@@ -4,6 +4,14 @@ Diese kleine Kollection von Tampermonkey Scripts soll das Nutzererlebnis auf Gro
 
 # Script Übersicht
 
+## Chat Filter
+
+Dieses kleine Script fügt eine Filterfunktion für den Chat hinzu, mit der ihr Nachrichten, die bestimmte Wörter oder Wortgruppen enthalten, verstecken könnt. Besonders hilfreich, wenn mal wieder Commands in den Chat gespammt werden.
+
+<img width="500" alt="Screenshot_14" src="https://github.com/user-attachments/assets/b8a97773-b155-4da4-aab9-3db79e29a593" /><br>
+
+<img width="500" alt="Screenshot_13" src="https://github.com/user-attachments/assets/898894e9-0f05-4f51-9d52-65d2eda80642" />
+
 ## Chat Auto-Scroll (`gronkh-autoscroll.user.js`)
 
 In manchen Fällen kann es passieren, dass der Chat nicht ordentlich mitscrollt, vor allem auf größeren (4K) Monitoren. Dieses Script behebt das, indem es einen alternativen Auto-Scroll Modus hinzufügt, der den Chat zum dauerhaften Nach-Unten-Scrollen zwingt.
