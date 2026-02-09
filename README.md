@@ -32,11 +32,11 @@ Sehr breite Emotes (meist von 7TV, etc.) werden im Chat Replay nicht richtig ang
 
 Ohne Script:
 
-<img width="500" alt="Screenshot_9" src="https://github.com/user-attachments/assets/5fad656b-641e-49a2-b415-3bf8f7b1ffc9" />
+<img width="500" alt="Screenshot_10" src="https://github.com/user-attachments/assets/1901754e-38b0-4483-bf1c-b0dead1937df" />
 
 Mit Script:
 
-<img width="500" alt="Screenshot_10" src="https://github.com/user-attachments/assets/1901754e-38b0-4483-bf1c-b0dead1937df" />
+<img width="500" alt="Screenshot_9" src="https://github.com/user-attachments/assets/5fad656b-641e-49a2-b415-3bf8f7b1ffc9" />
 
 ## Reload-on-Error (`gronkh-error-reload.user.js`)
 
