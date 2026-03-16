@@ -66,6 +66,9 @@ Mit diesem Script werden unter dem Video zwei neue Buttons hinzugefügt, mit den
 
 Da es seit einem bestimmten Update von Gronkh.TV nicht mehr möglich zu sein scheint, ein Video automatisch starten zu lassen, bringt dieses Script genau dieses alte Auto-Play Verhalten zurück.
 
+## Watch History (`gronkh-watch-history.user.js`)
+
+Dieses Script fuegt dem Nutzermenue oben rechts einen neuen "Watch History"-Eintrag hinzu. Darueber laesst sich ein lokaler Verlauf aller angesehenen Streams oeffnen, inklusive zuletzt gesehener Position pro Stream.
 
 
 
