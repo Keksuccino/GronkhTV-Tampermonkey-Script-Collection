@@ -120,15 +120,27 @@
       .trim();
   }
 
-  function getCurrentTitle() {
-    const metaTitle = document.querySelector('meta[property="og:title"]')?.getAttribute('content');
-    const heading =
-      document.querySelector('grnk-stream h1')?.textContent ||
-      document.querySelector('main h1')?.textContent ||
-      document.querySelector('meta[name="twitter:title"]')?.getAttribute('content') ||
-      document.title;
+  function isGenericSectionTitle(title) {
+    return /^(?:Aehnliche Videos|Ähnliche Videos|Kommentare)$/i.test(String(title || '').trim());
+  }
 
-    return cleanTitle(metaTitle || heading) || `Stream ${getCurrentStreamId() || ''}`.trim();
+  function getCurrentTitle() {
+    const candidates = [
+      document.querySelector('meta[property="og:title"], meta[name="og:title"]')?.getAttribute('content'),
+      document.querySelector('meta[name="twitter:title"]')?.getAttribute('content'),
+      document.title,
+      document.querySelector('grnk-stream h1')?.textContent,
+      document.querySelector('main h1')?.textContent,
+    ];
+
+    for (const candidate of candidates) {
+      const cleaned = cleanTitle(candidate);
+      if (!cleaned) continue;
+      if (isGenericSectionTitle(cleaned)) continue;
+      return cleaned;
+    }
+
+    return `Stream ${getCurrentStreamId() || ''}`.trim();
   }
 
   function getCurrentImageUrl() {
