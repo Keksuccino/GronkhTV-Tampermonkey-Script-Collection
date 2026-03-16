@@ -33,9 +33,7 @@
     playedSeconds: 0,
     lastMediaTime: null,
     lastProgressSaveTs: 0,
-    domObserver: null,
-    videoObserver: null,
-    routeTickId: null,
+    pollId: null,
     lastHref: location.href,
   };
 
@@ -719,11 +717,6 @@
       state.currentVideo.removeEventListener('seeked', onVideoSeeked);
     }
 
-    if (state.videoObserver) {
-      state.videoObserver.disconnect();
-      state.videoObserver = null;
-    }
-
     state.currentVideo = null;
     resetPlaybackState();
   }
@@ -758,13 +751,6 @@
     video.addEventListener('ended', onVideoEnded);
     video.addEventListener('loadedmetadata', onLoadedMetadata);
     video.addEventListener('seeked', onVideoSeeked);
-
-    state.videoObserver = new MutationObserver(() => {
-      if (!document.contains(video)) {
-        attachVideoIfNeeded();
-      }
-    });
-    state.videoObserver.observe(document.documentElement, { childList: true, subtree: true });
   }
 
   function onLoadedMetadata() {
@@ -837,28 +823,41 @@
     attachVideoIfNeeded();
   }
 
-  function bootObservers() {
-    if (state.domObserver) return;
+  function scheduleMenuInjection() {
+    window.setTimeout(() => ensureMenuItem(), 0);
+    window.setTimeout(() => ensureMenuItem(), 120);
+    window.setTimeout(() => ensureMenuItem(), 350);
+  }
 
-    state.domObserver = new MutationObserver(() => {
-      handleRouteChange();
-      ensureMenuItem();
-      attachVideoIfNeeded();
-    });
-    state.domObserver.observe(document.documentElement, { childList: true, subtree: true });
+  function installMenuTriggerListener() {
+    document.addEventListener(
+      'click',
+      (event) => {
+        const target = event.target instanceof Element ? event.target : null;
+        if (!target) return;
 
-    state.routeTickId = window.setInterval(() => {
+        const trigger = target.closest('button[aria-label*="Nutzermenü"], button[title*="Nutzermenü"]');
+        if (!trigger) return;
+
+        scheduleMenuInjection();
+      },
+      true,
+    );
+  }
+
+  function startPolling() {
+    if (state.pollId !== null) return;
+    state.pollId = window.setInterval(() => {
       handleRouteChange();
-      ensureMenuItem();
       attachVideoIfNeeded();
     }, 1000);
   }
 
   function init() {
     ensureStyle();
-    ensureMenuItem();
     attachVideoIfNeeded();
-    bootObservers();
+    installMenuTriggerListener();
+    startPolling();
 
     window.addEventListener('pagehide', () => commitProgress(false));
     window.addEventListener('beforeunload', () => commitProgress(false));
