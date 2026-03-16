@@ -15,6 +15,9 @@ There is no build step or package-managed toolchain in this repository.
 
 For runtime validation, load the changed `.user.js` file in Tampermonkey and test directly on `https://gronkh.tv/*`.
 
+## Agent Workflow
+When analyzing `gronkh.tv` while working on these scripts, prefer BrowserMCP so DOM structure, controls, and live behavior are checked against the real site rather than guessed from static code.
+
 ## Coding Style & Naming Conventions
 Match the existing script style:
 
