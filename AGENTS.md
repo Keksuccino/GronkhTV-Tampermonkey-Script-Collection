@@ -16,7 +16,7 @@ Use this workflow whenever a script depends on current GronkhTV markup, menus, c
    - Search with `rg` for old selectors, storage keys, menu labels, worker payload names, and DOM class names.
 
 2. Open the real page, not a static approximation.
-   - Use the user-provided URL when available. For chat replay offset work, `https://gronkh.tv/stream/518` is a useful regression page.
+   - Use the user-provided URL when available. If no URL is provided and the work concerns a video/stream page, `https://gronkh.tv/stream/518` is a useful regression page because it includes the video player, chat, comments, metadata, controls, and stream-page layout.
    - Use the Node REPL with the local Chrome executable for the browser session:
 
      ```js
@@ -162,18 +162,18 @@ Use this workflow whenever a script depends on current GronkhTV markup, menus, c
 7. Inject the local userscript at document start for verification.
    - Read the local `.user.js` file and inject its source with `context.addInitScript({ content })`.
    - If testing persistence or migration behavior, seed `localStorage` in the same init script before the userscript source runs.
-   - For the replay offset script, seed both old and current route-key variants when testing compatibility, for example `'/stream/518'` and `'/streams/518'`.
+   - If a script stores per-page state, seed realistic route-key variants when testing compatibility, for example `'/stream/518'` and `'/streams/518'`.
 
      ```js
      const fs = await import('node:fs/promises');
-     const userscript = await fs.readFile('gronkh-chat-replay-offset.user.js', 'utf8');
+     const userscript = await fs.readFile('gronkh-some-feature.user.js', 'utf8');
 
      await context.addInitScript({
        content: `
          if (location.hostname === 'gronkh.tv') {
            localStorage.setItem(
-             'tmGronkhReplayChatOffsetByStreamV1',
-             JSON.stringify({ '/stream/518': -90 })
+             'tmGronkhExampleStateV1',
+             JSON.stringify({ '/stream/518': { enabled: true } })
            );
          }
 
@@ -186,13 +186,13 @@ Use this workflow whenever a script depends on current GronkhTV markup, menus, c
    - Check that injected UI appears exactly once after repeated menu opens.
    - Check the menu text, item HTML, classes, ARIA attributes, and displayed value.
    - Trigger prompts or dialogs with the page `dialog` event and verify localStorage updates.
-   - For worker-based logic, verify the captured payload changed as expected. Example: with an offset of `-90`, an initial replay timestamp of `0` should be sent to the worker as `90`.
+   - For worker-based logic, verify the captured payload changed or passed through as expected for the feature being tested.
 
      ```js
      const result = await page.evaluate(() => ({
-       storage: localStorage.getItem('tmGronkhReplayChatOffsetByStreamV1'),
-       injectedCount: document.querySelectorAll('[data-tm-replay-offset-menu-item]').length,
-       injectedText: Array.from(document.querySelectorAll('[data-tm-replay-offset-menu-item]'))
+       storage: localStorage.getItem('tmGronkhExampleStateV1'),
+       injectedCount: document.querySelectorAll('[data-tm-example-menu-item]').length,
+       injectedText: Array.from(document.querySelectorAll('[data-tm-example-menu-item]'))
          .map((el) => (el.innerText || el.textContent || '').trim()),
        workerMessages: (window.__tmWorkerMessages || []).slice(0, 4)
      }));
