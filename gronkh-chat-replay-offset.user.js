@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Gronkh.tv Replay Chat Offset
 // @namespace    https://gronkh.tv/
-// @version      0.1.0
+// @version      0.1.1
 // @description  Shift replay chat timing per stream with a persistent configurable offset.
 // @match        https://gronkh.tv/*
 // @run-at       document-start
@@ -13,11 +13,29 @@
 
   const STORAGE_KEY = 'tmGronkhReplayChatOffsetByStreamV1';
   const STYLE_ID = 'tm-gronkh-replay-offset-style';
+  const MENU_ITEM_ATTR = 'data-tm-replay-offset-menu-item';
   const MENU_ITEM_CLASS = 'tm-replay-offset-menu-item';
   const MENU_VALUE_CLASS = 'tm-replay-offset-menu-value';
+  const SELECTORS = {
+    chatSettingsTrigger: [
+      'grnk-chat-replay button[mattooltip="Chat-Einstellungen"][ngmenutrigger]',
+      'grnk-chat-replay button[mattooltip="Chat Einstellungen"][ngmenutrigger]',
+      'grnk-chat-replay button[aria-label="Chat-Einstellungen"][ngmenutrigger]',
+      'grnk-chat-replay button[aria-label="Chat Einstellungen"][ngmenutrigger]',
+      'grnk-chat-replay button[gruipopover="Chat Einstellungen"].cdk-menu-trigger',
+      'grnk-chat-replay button[aria-label="Chat Einstellungen"].cdk-menu-trigger'
+    ].join(', '),
+    chatSettingsMenu: [
+      'grnk-chat-replay [role="menu"][ngmenu]',
+      '.cdk-overlay-container [role="menu"]',
+      '.cdk-overlay-container .cdk-menu',
+      '.context-menu'
+    ].join(', ')
+  };
 
   let offsetByStream = loadOffsetMap();
   let lastHref = location.href;
+  let observersStarted = false;
 
   function loadOffsetMap() {
     try {
@@ -43,15 +61,17 @@
     localStorage.setItem(STORAGE_KEY, JSON.stringify(offsetByStream));
   }
 
-  function getStreamKeyFromPath(pathname) {
-    if (typeof pathname !== 'string' || !pathname.length) return '/';
-    const match = pathname.match(/^\/streams\/([^/?#]+)/);
-    if (match) return '/streams/' + match[1];
-    return pathname;
+  function getStreamKeysFromPath(pathname) {
+    if (typeof pathname !== 'string' || !pathname.length) return ['/'];
+    const match = pathname.match(/^\/streams?\/([^/?#]+)/);
+    if (!match) return [pathname];
+
+    const streamId = match[1];
+    return ['/streams/' + streamId, '/stream/' + streamId];
   }
 
-  function getCurrentStreamKey() {
-    return getStreamKeyFromPath(location.pathname);
+  function getCurrentStreamKeys() {
+    return getStreamKeysFromPath(location.pathname);
   }
 
   function getOffsetForStream(streamKey) {
@@ -62,17 +82,23 @@
   }
 
   function getCurrentOffset() {
-    return getOffsetForStream(getCurrentStreamKey());
+    const streamKeys = getCurrentStreamKeys();
+    for (const streamKey of streamKeys) {
+      const offset = getOffsetForStream(streamKey);
+      if (offset) return offset;
+    }
+    return 0;
   }
 
   function setCurrentOffset(seconds) {
-    const streamKey = getCurrentStreamKey();
+    const streamKeys = getCurrentStreamKeys();
+    const streamKey = streamKeys[0];
     if (!streamKey) return;
 
     const rounded = Math.round(seconds);
-    if (!Number.isFinite(rounded) || rounded === 0) {
-      delete offsetByStream[streamKey];
-    } else {
+    streamKeys.forEach((key) => delete offsetByStream[key]);
+
+    if (Number.isFinite(rounded) && rounded !== 0) {
       offsetByStream[streamKey] = rounded;
     }
 
@@ -140,6 +166,10 @@
         text-align: left;
       }
 
+      .${MENU_ITEM_CLASS} span {
+        pointer-events: none;
+      }
+
       .${MENU_VALUE_CLASS} {
         opacity: 0.75;
         font-variant-numeric: tabular-nums;
@@ -157,11 +187,57 @@
     return text.includes('Animierte Emotes') && text.includes('Zeitstempel');
   }
 
-  function buildMenuItem() {
-    const button = document.createElement('button');
+  function copyAngularScopeAttributes(source, target) {
+    if (!(source instanceof Element) || !(target instanceof Element)) return;
+
+    Array.from(source.attributes).forEach((attr) => {
+      if (attr.name.startsWith('_ngcontent-')) {
+        target.setAttribute(attr.name, attr.value);
+      }
+    });
+  }
+
+  function addClassName(element, className) {
+    if (!className) return;
+    className.split(/\s+/).forEach((name) => {
+      if (name) element.classList.add(name);
+    });
+  }
+
+  function applyMenuItemShell(button, sampleItem) {
     button.type = 'button';
-    button.className = MENU_ITEM_CLASS;
+    button.setAttribute(MENU_ITEM_ATTR, '1');
     button.setAttribute('role', 'menuitem');
+
+    if (!(sampleItem instanceof Element)) {
+      button.className = MENU_ITEM_CLASS;
+      button.style.cssText = [
+        'width: 100%',
+        'text-align: left',
+        'padding: 10px 12px',
+        'background: transparent',
+        'color: inherit',
+        'border: 0',
+        'cursor: pointer',
+        'font: inherit'
+      ].join(';');
+      return;
+    }
+
+    copyAngularScopeAttributes(sampleItem, button);
+    addClassName(button, sampleItem.className || '');
+    button.classList.add(MENU_ITEM_CLASS);
+
+    if (sampleItem.hasAttribute('ngmenuitem')) button.setAttribute('ngmenuitem', '');
+    button.setAttribute('tabindex', sampleItem.getAttribute('tabindex') || '-1');
+    button.setAttribute('data-active', 'false');
+    button.setAttribute('aria-haspopup', 'false');
+    button.setAttribute('aria-disabled', 'false');
+  }
+
+  function buildMenuItem(sampleItem) {
+    const button = document.createElement('button');
+    applyMenuItemShell(button, sampleItem);
 
     const label = document.createElement('span');
     label.textContent = 'Replay Chat Offset';
@@ -171,6 +247,12 @@
 
     button.appendChild(label);
     button.appendChild(value);
+
+    if (sampleItem instanceof Element) {
+      const sampleSpan = sampleItem.querySelector('span') || sampleItem;
+      copyAngularScopeAttributes(sampleSpan, label);
+      copyAngularScopeAttributes(sampleSpan, value);
+    }
 
     button.addEventListener('click', (event) => {
       event.preventDefault();
@@ -212,10 +294,12 @@
   function ensureMenuItem(menu) {
     if (!isReplaySettingsMenu(menu)) return;
 
-    let item = menu.querySelector('.' + MENU_ITEM_CLASS);
+    let item = menu.querySelector('[' + MENU_ITEM_ATTR + '], .' + MENU_ITEM_CLASS);
     if (!item) {
-      item = buildMenuItem();
-      menu.appendChild(item);
+      const sampleItem = menu.querySelector('button[ngmenuitem], button[role="menuitem"], button[role="menuitemcheckbox"], button, [role="menuitem"], .cdk-menu-item');
+      const container = sampleItem && sampleItem.parentElement ? sampleItem.parentElement : menu;
+      item = buildMenuItem(sampleItem);
+      container.appendChild(item);
     }
 
     updateMenuItemLabel(item);
@@ -224,11 +308,11 @@
   function scanForReplayMenus(root) {
     if (!(root instanceof Element)) return;
 
-    if (root.matches('.context-menu')) {
+    if (root.matches(SELECTORS.chatSettingsMenu)) {
       ensureMenuItem(root);
     }
 
-    root.querySelectorAll('.context-menu').forEach((menu) => ensureMenuItem(menu));
+    root.querySelectorAll(SELECTORS.chatSettingsMenu).forEach((menu) => ensureMenuItem(menu));
   }
 
   function refreshMenuItems() {
@@ -295,8 +379,34 @@
     });
   }
 
+  function scheduleMenuScan() {
+    [0, 50, 250].forEach((delay) => {
+      window.setTimeout(() => scanForReplayMenus(document.documentElement), delay);
+    });
+  }
+
+  function observeSettingsClicks() {
+    document.addEventListener(
+      'click',
+      (event) => {
+        const target = event.target instanceof Element ? event.target : null;
+        const trigger = target && target.closest(SELECTORS.chatSettingsTrigger);
+        if (trigger) scheduleMenuScan();
+      },
+      true
+    );
+  }
+
   function startObservers() {
+    if (observersStarted) return;
+    if (!document.documentElement) {
+      window.addEventListener('DOMContentLoaded', startObservers, { once: true });
+      return;
+    }
+
+    observersStarted = true;
     ensureStyle();
+    observeSettingsClicks();
 
     const observer = new MutationObserver((mutations) => {
       for (const mutation of mutations) {
