@@ -1,7 +1,7 @@
 # Repository Guidelines
 
 ## Project Structure & Module Organization
-This repository is a flat collection of standalone Tampermonkey userscripts. Each feature lives in a single root-level file such as `gronkh-autoscroll.user.js` or `gronkh-tv-chat-filter.user.js`. `README.md` documents behavior and screenshots, and `LICENSE` covers distribution. There are no shared modules, asset folders, or generated build outputs, so keep changes isolated to the relevant script unless a cross-script convention needs updating.
+This repository is a flat collection of standalone Tampermonkey userscripts for the `https://gronkh.tv` webpage. Each feature lives in a single root-level file such as `gronkh-autoscroll.user.js` or `gronkh-tv-chat-filter.user.js`. `README.md` documents behavior and screenshots, and `LICENSE` covers distribution. There are no shared modules, asset folders, or generated build outputs, so keep changes isolated to the relevant script unless a cross-script convention needs updating.
 
 ## Agent Workflow
 When analyzing `gronkh.tv` while working on these scripts, use the Node REPL with the local Chrome executable as the default live debugging workflow. DOM structure, controls, worker messages, and live behavior must be checked against the real site rather than guessed from static code.
