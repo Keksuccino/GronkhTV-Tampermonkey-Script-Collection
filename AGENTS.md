@@ -4,7 +4,7 @@
 This repository is a flat collection of standalone Tampermonkey userscripts. Each feature lives in a single root-level file such as `gronkh-autoscroll.user.js` or `gronkh-tv-chat-filter.user.js`. `README.md` documents behavior and screenshots, and `LICENSE` covers distribution. There are no shared modules, asset folders, or generated build outputs, so keep changes isolated to the relevant script unless a cross-script convention needs updating.
 
 ## Agent Workflow
-When analyzing `gronkh.tv` while working on these scripts, prefer live browser debugging so DOM structure, controls, worker messages, and live behavior are checked against the real site rather than guessed from static code.
+When analyzing `gronkh.tv` while working on these scripts, use the Node REPL with the local Chrome executable as the default live debugging workflow. DOM structure, controls, worker messages, and live behavior must be checked against the real site rather than guessed from static code.
 
 ### GronkhTV Live Debugging Workflow
 
@@ -17,8 +17,7 @@ Use this workflow whenever a script depends on current GronkhTV markup, menus, c
 
 2. Open the real page, not a static approximation.
    - Use the user-provided URL when available. For chat replay offset work, `https://gronkh.tv/stream/518` is a useful regression page.
-   - Prefer BrowserMCP when available.
-   - If BrowserMCP is not available or Playwright's bundled browser is missing, use Playwright through the Node REPL with the local Chrome executable:
+   - Use the Node REPL with the local Chrome executable for the browser session:
 
      ```js
      const { chromium } = await import('playwright');
@@ -70,7 +69,7 @@ Use this workflow whenever a script depends on current GronkhTV markup, menus, c
 
 4. Deal with first-visit dialogs explicitly.
    - Cookie and autoplay dialogs can block pointer clicks in headless runs.
-   - Inspect `.cdk-overlay-container button` and click the relevant button from the page context if Playwright reports that a backdrop intercepts pointer events.
+   - Inspect `.cdk-overlay-container button` and click the relevant button from the page context if browser automation reports that a backdrop intercepts pointer events.
 
      ```js
      await page.evaluate(() => {
@@ -186,7 +185,7 @@ Use this workflow whenever a script depends on current GronkhTV markup, menus, c
 8. Verify behavior through page state, not only visual assumptions.
    - Check that injected UI appears exactly once after repeated menu opens.
    - Check the menu text, item HTML, classes, ARIA attributes, and displayed value.
-   - Trigger prompts or dialogs with Playwright's `dialog` event and verify localStorage updates.
+   - Trigger prompts or dialogs with the page `dialog` event and verify localStorage updates.
    - For worker-based logic, verify the captured payload changed as expected. Example: with an offset of `-90`, an initial replay timestamp of `0` should be sent to the worker as `90`.
 
      ```js
